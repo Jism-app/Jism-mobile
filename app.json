@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "PhysiqueAI",
+    "slug": "physiqueai",
+    "version": "0.0.1",
+    "scheme": "physiqueai",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.physiqueai.app"
+    },
+    "android": {
+      "package": "com.physiqueai.app"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ]
+  }
+}
