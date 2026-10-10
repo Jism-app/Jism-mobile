@@ -36,7 +36,7 @@ export function Button({
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? colors.white : colors.primary} />
+        <ActivityIndicator color={variant === 'primary' ? colors.black : colors.primary} />
       ) : (
         <Text style={[styles.label, styles[`labelVariant_${variant}`]]}>{label}</Text>
       )}
@@ -47,29 +47,31 @@ export function Button({
 function makeStyles(colors: ColorTokens) {
   return StyleSheet.create({
     base: {
-      height: 52,
-      borderRadius: theme.radius.md,
+      height: 60,
+      borderRadius: theme.radius.lg,
       alignItems: 'center',
       justifyContent: 'center',
       paddingHorizontal: theme.spacing.lg,
     },
     label: {
       ...theme.typography.bodyMedium,
+      fontWeight: '800',
+      letterSpacing: 0.4,
     },
     disabled: {
       opacity: 0.5,
     },
     pressed: {
-      opacity: 0.85,
+      opacity: 0.78,
     },
-    variant_primary: { backgroundColor: colors.primary },
+    variant_primary: { backgroundColor: colors.warning },
     variant_secondary: {
       backgroundColor: 'transparent',
       borderWidth: 1,
-      borderColor: colors.border,
+      borderColor: colors.primary,
     },
     variant_ghost: { backgroundColor: 'transparent' },
-    labelVariant_primary: { color: colors.white },
+    labelVariant_primary: { color: colors.black },
     labelVariant_secondary: { color: colors.textPrimary },
     labelVariant_ghost: { color: colors.primary },
   });

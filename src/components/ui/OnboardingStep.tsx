@@ -1,6 +1,7 @@
 import { ReactNode, useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
+import { ArrowLeft } from 'lucide-react-native';
 import { Screen } from './Screen';
 import { Button } from './Button';
 import { ProgressBar } from './ProgressBar';
@@ -42,9 +43,10 @@ export function OnboardingStep({
     <Screen scroll={scrollable}>
       <View style={styles.progressRow}>
         {showBack && router.canGoBack() ? (
-          <Text style={styles.back} onPress={() => router.back()}>
-            ← Back
-          </Text>
+          <Pressable onPress={() => router.back()} style={styles.back} hitSlop={8}>
+            <ArrowLeft color={colors.textPrimary} size={18} strokeWidth={2} />
+            <Text style={styles.backText}>Back</Text>
+          </Pressable>
         ) : (
           <View />
         )}
@@ -55,6 +57,7 @@ export function OnboardingStep({
       <ProgressBar step={step} totalSteps={totalSteps} />
 
       <View style={styles.header}>
+        <View style={styles.accentLine} />
         <Text style={styles.title}>{title}</Text>
         {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
       </View>
@@ -88,8 +91,13 @@ function makeStyles(colors: ColorTokens) {
       marginBottom: theme.spacing.sm,
     },
     back: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: theme.spacing.xs,
+    },
+    backText: {
       ...theme.typography.body,
-      color: colors.textSecondary,
+      color: colors.textPrimary,
     },
     stepCount: {
       ...theme.typography.caption,
@@ -98,6 +106,12 @@ function makeStyles(colors: ColorTokens) {
     header: {
       marginTop: theme.spacing.xl,
       marginBottom: theme.spacing.lg,
+    },
+    accentLine: {
+      width: 34,
+      height: 4,
+      backgroundColor: colors.warning,
+      marginBottom: theme.spacing.md,
     },
     title: {
       ...theme.typography.h1,
@@ -112,7 +126,8 @@ function makeStyles(colors: ColorTokens) {
       flex: 1,
     },
     continueButton: {
-      marginTop: theme.spacing.lg,
+      marginTop: 'auto',
+      marginBottom: theme.spacing.lg,
     },
     skip: {
       ...theme.typography.bodyMedium,

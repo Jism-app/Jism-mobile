@@ -1,17 +1,17 @@
 {
   "expo": {
-    "name": "PhysiqueAI",
-    "slug": "physiqueai",
+    "name": "CADENIQUE",
+    "slug": "cadenique",
     "version": "0.0.1",
-    "scheme": "physiqueai",
+    "scheme": "cadenique",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.physiqueai.app"
+      "bundleIdentifier": "com.cadenique.app"
     },
     "android": {
-      "package": "com.physiqueai.app"
+      "package": "com.cadenique.app"
     },
     "plugins": [
       "expo-router",
