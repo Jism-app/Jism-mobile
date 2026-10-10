@@ -47,6 +47,7 @@ function makeStyles(colors: ColorTokens) {
     },
     scrollContent: {
       flexGrow: 1,
+      paddingBottom: theme.spacing.xl,
     },
     content: {
       flex: 1,

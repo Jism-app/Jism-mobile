@@ -55,7 +55,7 @@ export const useOnboardingStore = create<OnboardingState>()(
       reset: () => set({ draft: emptyDraft }),
     }),
     {
-      name: 'physiqueai-onboarding-draft',
+      name: 'cadenique-onboarding-draft',
       storage: createJSONStorage(() => secureStorage),
     },
   ),

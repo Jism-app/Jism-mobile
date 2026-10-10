@@ -18,6 +18,7 @@ export default function SexStep() {
       continueDisabled={!draft.sex}
     >
       <OptionList
+        layout="grid"
         options={[
           { value: 'male', label: 'Male' },
           { value: 'female', label: 'Female' },

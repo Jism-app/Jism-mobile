@@ -29,7 +29,7 @@ function makeStyles(colors: ColorTokens) {
     },
     fill: {
       height: '100%',
-      backgroundColor: colors.primary,
+      backgroundColor: colors.warning,
       borderRadius: theme.radius.full,
     },
   });
