@@ -1,4 +1,4 @@
-import { Slot } from 'expo-router';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -19,7 +19,13 @@ export default function RootLayout() {
         <ThemeProvider>
           <AuthProvider>
             <ThemedStatusBar />
-            <Slot />
+            <Stack
+              screenOptions={{
+                animation: 'none',
+                headerShown: false,
+                contentStyle: { backgroundColor: '#020500' },
+              }}
+            />
           </AuthProvider>
         </ThemeProvider>
       </SafeAreaProvider>

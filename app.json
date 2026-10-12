@@ -3,6 +3,12 @@
     "name": "CADENIQUE",
     "slug": "cadenique",
     "version": "0.0.1",
+    "icon": "./assets/branding/icons/cadenique-icon.png",
+    "splash": {
+      "image": "./assets/images/Splashs creen/Écran Splash Néon du Coureur.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#020500"
+    },
     "scheme": "cadenique",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
