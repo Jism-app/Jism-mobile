@@ -21,7 +21,14 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "PhysiqueAI needs camera access to guide and capture your body scan.",
+          "enableMicrophonePermission": false
+        }
+      ]
     ]
   }
 }
