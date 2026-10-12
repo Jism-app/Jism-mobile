@@ -1,12 +1,9 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
 import { Redirect } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { useAuth } from '../context/AuthContext';
 import { api, ApiError } from '../lib/api';
-import { useTheme, ColorTokens } from '../components/theme';
-import { CadeniqueLoader } from '../components/ui/CadeniqueLoader';
-import { useMemo } from 'react';
+import { CadeniqueSplash } from '../components/ui/CadeniqueSplash';
 
 const WELCOME_SEEN_KEY = 'cadenique-welcome-seen';
 
@@ -14,12 +11,16 @@ type Destination = '/welcome' | '/(auth)/login' | '/(onboarding)/age' | '/(home)
 
 export default function Index() {
   const { session, loading: authLoading } = useAuth();
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [destination, setDestination] = useState<Destination | null>(null);
   const [checkingProfile, setCheckingProfile] = useState(false);
   const [welcomeChecked, setWelcomeChecked] = useState(false);
   const [welcomeSeen, setWelcomeSeen] = useState(false);
+  const [splashFinished, setSplashFinished] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setSplashFinished(true), 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     SecureStore.getItemAsync(WELCOME_SEEN_KEY).then((value) => {
@@ -55,24 +56,15 @@ export default function Index() {
       .finally(() => setCheckingProfile(false));
   }, [session, authLoading, welcomeChecked, welcomeSeen]);
 
-  if (authLoading || !welcomeChecked || checkingProfile || !destination) {
-    return (
-      <View style={styles.container}>
-        <CadeniqueLoader />
-      </View>
-    );
+  if (
+    authLoading ||
+    !welcomeChecked ||
+    checkingProfile ||
+    !destination ||
+    !splashFinished
+  ) {
+    return <CadeniqueSplash />;
   }
 
   return <Redirect href={destination} />;
-}
-
-function makeStyles(colors: ColorTokens) {
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-  });
 }
