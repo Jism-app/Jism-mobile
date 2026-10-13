@@ -39,7 +39,7 @@ export default function SummaryStep() {
       const result = await api.post('/profiles/me', draft);
       console.log('[onboarding] profile created:', JSON.stringify(result));
       reset();
-      router.replace('/');
+      router.replace('/(onboarding)/scan-intro');
     } catch (err) {
       console.error('[onboarding] submit failed:', err);
       if (err instanceof ApiError) {

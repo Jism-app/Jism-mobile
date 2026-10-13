@@ -1,0 +1,9 @@
+{
+  "name": "physiqueai-pose-landmarker",
+  "version": "0.1.0",
+  "description": "Local native module: VisionCamera frame-processor plugin wrapping MediaPipe Pose Landmarker (Android). Lives outside the gitignored android/ folder so it survives `expo prebuild`.",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "private": true,
+  "react-native": "index.js"
+}
