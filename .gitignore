@@ -6,3 +6,6 @@ dist/
 .DS_Store
 ios/
 android/
+!modules/pose-landmarker/android/
+!modules/pose-landmarker/android/**
+modules/pose-landmarker/android/src/main/assets/*.task

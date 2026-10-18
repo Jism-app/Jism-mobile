@@ -5,12 +5,10 @@ lives outside the gitignored `android/` folder specifically so it
 survives `expo prebuild` regeneration. You never hand-edit anything in
 `android/` for this — autolinking does it for you at build time.
 
-Status: **UNTESTED**. No physical Android device was available while
-building this. It should compile; whether it actually detects a pose
-correctly can only be confirmed once you run it on a device/emulator with
-a working camera feed. See the comments at the top of
-`PoseLandmarkerFrameProcessorPlugin.kt` for the three specific things
-most likely to need adjustment.
+Status: **IMPLEMENTED**. The Android module registers `detectPose`, converts
+VisionCamera YUV frames to MediaPipe images, and returns the first detected
+33-point pose. It still needs validation on a physical Android device with a
+working camera feed.
 
 ## 1. Copy the module folder
 
@@ -52,7 +50,7 @@ speed):
 https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task
 ```
 
-Download it and place it at exactly:
+Download it and place it at exactly (the file is intentionally ignored by git):
 
 ```
 mobile/modules/pose-landmarker/android/src/main/assets/pose_landmarker_lite.task
@@ -116,7 +114,7 @@ npx expo run:android
 new native module — a stale prebuild cache could silently skip
 autolinking it.
 
-## 7. Using it from JS (next task, not done yet)
+## 7. Using it from JS
 
 Once it builds, the plugin is called from JS like this (this wiring
 — the actual camera screen — is the next task, not included here):
