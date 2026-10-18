@@ -21,10 +21,10 @@ export default function ScanIntroStep() {
 
     const handleContinue = async () => {
     const currentStatus = Camera.getCameraPermissionStatus();
-    console.log('[scan-intro] button pressed, current permission status:', currentStatus);
+    console.log('[tro] button pressed, current permission status:', currentStatus);
 
     if (currentStatus === 'granted') {
-      console.log('[scan-intro] already granted, skipping requestCameraPermission entirely');
+      console.log('[tro] already granted, skipping requestCameraPermission entirely');
       router.push('/(onboarding)/scan-capture');
       return;
     }
@@ -32,16 +32,16 @@ export default function ScanIntroStep() {
     setRequesting(true);
     setDenied(false);
     try {
-      console.log('[scan-intro] calling requestCameraPermission...');
+      console.log('[tro] calling requestCameraPermission...');
       const permission = await Camera.requestCameraPermission();
-      console.log('[scan-intro] requestCameraPermission resolved:', permission);
+      console.log('[tro] requestCameraPermission resolved:', permission);
       if (permission === 'granted') {
         router.push('/(onboarding)/scan-capture');
       } else {
         setDenied(true);
       }
     } catch (err) {
-      console.error('[scan-intro] requestCameraPermission threw:', err);
+      console.error('[tro] requestCameraPermission threw:', err);
       setDenied(true);
     } finally {
       setRequesting(false);

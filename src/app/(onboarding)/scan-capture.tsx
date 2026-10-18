@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Svg, { Circle, Line } from 'react-native-svg';
 import { router } from 'expo-router';
+import { useIsFocused } from '@react-navigation/native';
 import { Camera, useCameraDevice, useFrameProcessor, VisionCameraProxy } from 'react-native-vision-camera';
 import { Worklets } from 'react-native-worklets-core';
 import { Button } from '../../components/ui/Button';
@@ -31,6 +33,33 @@ const ANGLE_LABELS: Record<ScanAngle, string> = {
 const COUNTDOWN_START = 3;
 const COUNTDOWN_STEP_MS = 800;
 
+// MediaPipe 33-point body connections (face/hands omitted for a clean overlay).
+const SKELETON_CONNECTIONS: [number, number][] = [
+  [11, 12], // shoulders
+  [11, 13], [13, 15], // left arm
+  [12, 14], [14, 16], // right arm
+  [11, 23], [12, 24], [23, 24], // torso
+  [23, 25], [25, 27], [27, 29], [29, 31], [27, 31], // left leg + foot
+  [24, 26], [26, 28], [28, 30], [30, 32], [28, 32], // right leg + foot
+];
+
+const MIN_VISIBILITY = 0.4;
+
+type Point = { x: number; y: number; visibility?: number };
+
+// Defensive: accepts an array of points or an object whose values are points.
+// Adjust here if your plugin returns a different shape.
+function toPoints(landmarks: PoseLandmarks | null): Point[] {
+  if (!landmarks) return [];
+  const raw: any = landmarks;
+  const list: any[] = Array.isArray(raw) ? raw : Object.values(raw);
+  return list.map((p) => ({
+    x: typeof p?.x === 'number' ? p.x : NaN,
+    y: typeof p?.y === 'number' ? p.y : NaN,
+    visibility: typeof p?.visibility === 'number' ? p.visibility : 1,
+  }));
+}
+
 type Stage = 'positioning' | 'countdown' | 'capturing' | 'uploading' | 'error';
 
 /**
@@ -52,15 +81,14 @@ type Stage = 'positioning' | 'countdown' | 'capturing' | 'uploading' | 'error';
 export default function ScanCaptureStep() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const device = useCameraDevice('back');
-useEffect(() => {
-  const devices = Camera.getAvailableCameraDevices();
-  console.log('[scan-capture] available camera devices:', JSON.stringify(devices, null, 2));
-}, []);
+  const device = useCameraDevice('front');
+  const isFocused = useIsFocused();
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [stage, setStage] = useState<Stage>('positioning');
   const [countdownValue, setCountdownValue] = useState(COUNTDOWN_START);
   const [matchResult, setMatchResult] = useState<PoseMatchResult | null>(null);
+  const [points, setPoints] = useState<Point[]>([]);
   const [capturedImages, setCapturedImages] = useState<CapturedAngleImage[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
@@ -73,20 +101,29 @@ useEffect(() => {
 
   useEffect(() => {
     stageRef.current = stage;
+    // Hide the skeleton as soon as we leave positioning.
+    if (stage !== 'positioning') setPoints([]);
   }, [stage]);
 
   useEffect(() => {
     angleRef.current = currentAngle;
     trackerRef.current.reset();
     setMatchResult(null);
+    setPoints([]);
   }, [currentAngle]);
 
   // Runs on the JS thread, called from the worklet below via
   // Worklets.createRunOnJS. Reads stage/angle through refs (not state)
   // so this callback never needs to change identity — the frame
-  // processor only needs to be rebuilt if `plugin` itself changes.
+  // processor only needs to be rebuilt if plugin itself changes.
   const handlePoseLandmarks = useCallback((landmarks: PoseLandmarks | null) => {
     if (stageRef.current !== 'positioning') return;
+
+    // Debug: confirms pose data is actually arriving from the native plugin.
+    // Remove once verified (it fires every frame).
+    // console.log('[scan-capture] landmarks:', landmarks ? toPoints(landmarks).length : 'null');
+
+    setPoints(toPoints(landmarks));
 
     // See the KNOWN GAP note in the file doc comment above.
     const stubQuality: FrameQualityMetrics = { brightness: 130, blurScore: 100, motionDelta: 0 };
@@ -106,7 +143,16 @@ useEffect(() => {
     [handlePoseLandmarks],
   );
 
-  const plugin = useMemo(() => VisionCameraProxy.initFrameProcessorPlugin('detectPose', {}), []);
+  const plugin = useMemo(() => {
+    try {
+      const p = VisionCameraProxy.initFrameProcessorPlugin('detectPose', {});
+      console.log('[scan-capture] detectPose plugin:', p ? 'loaded' : 'MISSING');
+      return p;
+    } catch (error) {
+      console.error('[scan-capture] failed to initialize detectPose plugin', error);
+      return null;
+    }
+  }, []);
 
   const frameProcessor = useFrameProcessor(
     (frame) => {
@@ -201,7 +247,18 @@ useEffect(() => {
     );
   }
 
-  const cameraActive = stage !== 'error';
+  if (!plugin) {
+    return (
+      <SafeAreaView style={styles.centerFill}>
+        <Text style={styles.errorText}>
+          Body scanning is unavailable in this build. Reinstall the development build after
+          enabling the MediaPipe native module.
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
+  const cameraActive = stage !== 'error' && isFocused;
 
   return (
     <View style={styles.flex}>
@@ -212,7 +269,47 @@ useEffect(() => {
         isActive={cameraActive}
         photo
         frameProcessor={stage === 'positioning' ? frameProcessor : undefined}
+        onInitialized={() => console.log('[scan-capture] camera initialized')}
+        onError={(e) => console.log('[scan-capture] camera error', e.code, e.message)}
       />
+
+      {/* Pose skeleton overlay */}
+      {stage === 'positioning' && points.length > 0 ? (
+        <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
+          {SKELETON_CONNECTIONS.map(([a, b]) => {
+            const p1 = points[a];
+            const p2 = points[b];
+            if (!p1 || !p2) return null;
+            if (!Number.isFinite(p1.x) || !Number.isFinite(p2.x)) return null;
+            if ((p1.visibility ?? 1) < MIN_VISIBILITY || (p2.visibility ?? 1) < MIN_VISIBILITY) return null;
+            return (
+              <Line
+                key={`${a}-${b}`}
+                x1={`${p1.x * 100}%`}
+                y1={`${p1.y * 100}%`}
+                x2={`${p2.x * 100}%`}
+                y2={`${p2.y * 100}%`}
+                stroke={colors.primary}
+                strokeWidth={3}
+                strokeLinecap="round"
+              />
+            );
+          })}
+          {points.map((p, i) => {
+            if (i < 11 || !Number.isFinite(p.x) || !Number.isFinite(p.y)) return null;
+            if ((p.visibility ?? 1) < MIN_VISIBILITY) return null;
+            return (
+              <Circle
+                key={i}
+                cx={`${p.x * 100}%`}
+                cy={`${p.y * 100}%`}
+                r={4}
+                fill={colors.white}
+              />
+            );
+          })}
+        </Svg>
+      ) : null}
 
       <SafeAreaView style={styles.overlayFill} edges={['top', 'bottom']}>
         <View style={styles.topBar}>
