@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '../context/AuthContext';
+import { NotificationProvider } from '../context/NotificationContext';
 import { queryClient } from '../lib/queryClient';
 import { ThemeProvider, useTheme } from '../components/theme';
 
@@ -18,14 +19,16 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <ThemeProvider>
           <AuthProvider>
-            <ThemedStatusBar />
-            <Stack
-              screenOptions={{
-                animation: 'none',
-                headerShown: false,
-                contentStyle: { backgroundColor: '#020500' },
-              }}
-            />
+            <NotificationProvider>
+              <ThemedStatusBar />
+              <Stack
+                screenOptions={{
+                  animation: 'none',
+                  headerShown: false,
+                  contentStyle: { backgroundColor: '#020500' },
+                }}
+              />
+            </NotificationProvider>
           </AuthProvider>
         </ThemeProvider>
       </SafeAreaProvider>

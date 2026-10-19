@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { usePushRegistration } from '../hooks/usePushRegistration';
+import { unregisterPushToken } from '../lib/notifications';
 
 interface AuthContextValue {
   session: Session | null;
@@ -16,6 +18,8 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+
+  usePushRegistration(session?.user.id ?? null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -42,6 +46,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut: AuthContextValue['signOut'] = async () => {
     try {
+      // Must run while the JWT is still valid; never throws.
+      await unregisterPushToken();
+
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('[AuthContext] signOut error:', error.message);

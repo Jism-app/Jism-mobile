@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "942288938710",
+    "project_id": "cadenique",
+    "storage_bucket": "cadenique.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:942288938710:android:f88a03dab734a11ee90b77",
+        "android_client_info": {
+          "package_name": "com.cadenique.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0I_FAfidHTd6G0jc7n4HSlQgYFdk-Yg4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
